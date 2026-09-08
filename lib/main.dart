@@ -1,17 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:souq_app/features/products/presentation/screens/product_test_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:souq_app/features/cart/data/datasource/cart_local_datasource.dart';
 
-void main() {
-  runApp(const ProviderScope(child: MyApp()));
+import 'core/routing/app_router.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final prefs = await SharedPreferences.getInstance();
+
+  runApp(
+    ProviderScope(
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(prefs),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
+
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: ProductsTestScreen(),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(routerProvider);
+
+    return MaterialApp.router(
+      title: 'Souq App',
+      theme: ThemeData(
+          scaffoldBackgroundColor: Color.fromARGB(255, 245, 208, 170), 
+          useMaterial3: true,
+        ),      
+      debugShowCheckedModeBanner: false,
+      routerConfig: router,
     );
   }
 }

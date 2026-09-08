@@ -1,0 +1,22 @@
+{
+  "@@locale": "en",
+  "searchProduct": "Search Product..",
+  "all": "All",
+  "electronics": "Electronics",
+  "jewelery": "Jewelery",
+  "mensClothing": "Men's Clothing",
+  "womensClothing": "Women's Clothing",
+  "homePage": "Home Page",
+  "cart": "Cart",
+  "favorite": "Favorite",
+  "total": "Total",
+  "shipping": "Estimated Shipping",
+  "myCart": "My Cart",
+  "savedItems": "Saved Items",
+  "favoriteEmpty": "Your Wishlist is Empty",
+  "favoriteEmptySubMessage":"Tap the heart icon on any item to save it here for later",
+  "explore": "Explore",
+  "clearCart": "Clear Cart",
+  "free": "Free"
+
+}
