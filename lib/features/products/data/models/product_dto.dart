@@ -33,4 +33,13 @@ abstract class ProductDto with _$ProductDto {
         image: image,
         rating: rating.toEntity(),
       );
+  factory ProductDto.fromEntity(ProductEntity entity) => ProductDto(
+      id: entity.id,
+      title: entity.title,
+      price: entity.price,
+      description: entity.description,
+      category: entity.category,
+      image: entity.image,
+      rating: RatingDto.fromEntity(entity.rating),
+    );
 }

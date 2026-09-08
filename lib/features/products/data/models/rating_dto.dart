@@ -20,4 +20,9 @@ abstract class RatingDto with _$RatingDto {
         rate: rate,
         count: count,
       );
+  factory RatingDto.fromEntity(RatingEntity entity) => RatingDto(
+      rate: entity.rate,
+      count: entity.count,
+    );
+      
 }

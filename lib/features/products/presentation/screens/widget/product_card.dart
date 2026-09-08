@@ -16,7 +16,10 @@ class ProductCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final isFavorite = ref.watch(favoritesNotifierProvider).contains(product.id);
+    
+    final isFavorite = ref
+        .watch(favoriteProductsProvider)
+        .any((p) => p.id == product.id);
 
     return GestureDetector(
       onTap: onTap,
@@ -29,12 +32,7 @@ class ProductCard extends ConsumerWidget {
                 aspectRatio: 1,
                 child: Container(
                   decoration: BoxDecoration(
-                    //color: theme.colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(20.0),
-                    // border: Border.all(
-                    //   color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                    //   width: 1,
-                    // ),
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(20.0),
@@ -72,8 +70,8 @@ class ProductCard extends ConsumerWidget {
                     customBorder: const CircleBorder(),
                     onTap: () {
                       ref
-                          .read(favoritesNotifierProvider.notifier)
-                          .toggleFavorite(product.id);
+                          .read(favoriteProductsProvider.notifier)
+                          .toggleFavorite(product);
                     },
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
