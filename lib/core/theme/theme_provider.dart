@@ -28,7 +28,7 @@ class ThemeModeNotifier extends Notifier<ThemeMode> {
     final nextMode = switch (state) {
       ThemeMode.system => ThemeMode.light,
       ThemeMode.light => ThemeMode.dark,
-      ThemeMode.dark => ThemeMode.system,
+      ThemeMode.dark => ThemeMode.light,
     };
 
     state = nextMode;
