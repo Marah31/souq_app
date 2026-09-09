@@ -8,6 +8,7 @@ import '../../features/cart/presentation/screens/cart_screen.dart';
 import 'main_shell_scaffold.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
+final rootScaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(

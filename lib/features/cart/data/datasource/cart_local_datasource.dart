@@ -1,58 +1,50 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:souq_app/features/cart/domain/entity/cart_item_entity.dart';
+import 'package:souq_app/features/cart/data/models/cart_model.dart';
 
 final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
-  throw UnimplementedError('Initialize SharedPreferences in main.dart first!');
+  throw UnimplementedError('Initialize sharedPreferencesProvider in main.dart via overrides');
 });
 
-class CartLocalDataSource {
-  static const String _cartKey = 'user_cart_items';
-  final SharedPreferences _prefs;
+final cartLocalDataSourceProvider = Provider<CartLocalDataSource>((ref) {
+  final prefs = ref.watch(sharedPreferencesProvider);
+  return CartLocalDataSourceImpl(prefs);
+});
 
-  CartLocalDataSource(this._prefs);
+abstract class CartLocalDataSource {
+  List<CartItemModel> getSavedCart();
+  Future<bool> saveCart(List<CartItemModel> items);
+  Future<bool> clearCart();
+}
 
-  List<CartItemEntity> getSavedCart() {
+class CartLocalDataSourceImpl implements CartLocalDataSource {
+  static const _cartKey = 'saved_cart_items';
+  final SharedPreferences prefs;
+
+  CartLocalDataSourceImpl(this.prefs);
+
+  @override
+  List<CartItemModel> getSavedCart() {
+    final jsonList = prefs.getStringList(_cartKey);
+    if (jsonList == null || jsonList.isEmpty) return [];
+
     try {
-      final rawList = _prefs.getStringList(_cartKey) ?? [];
-      
-      return rawList.map((item) {
-        try {
-          return CartItemEntity.fromRawJson(item);
-        } catch (e) {
-          debugPrint('Failed to parse cart item: $e');
-          return null; 
-        }
-      }).whereType<CartItemEntity>().toList();
-      
+      return jsonList
+          .map((itemStr) => CartItemModel.fromRawJson(itemStr))
+          .toList();
     } catch (e) {
-      debugPrint('Failed to fetch cart from storage: $e');
       return [];
     }
   }
 
-  Future<bool> saveCart(List<CartItemEntity> items) async {
-    try {
-      final rawList = items.map((item) => item.toRawJson()).toList();
-      return await _prefs.setStringList(_cartKey, rawList);
-    } catch (e) {
-      debugPrint('Failed to save cart: $e');
-      return false;
-    }
+  @override
+  Future<bool> saveCart(List<CartItemModel> items) async {
+    final jsonList = items.map((item) => item.toRawJson()).toList();
+    return await prefs.setStringList(_cartKey, jsonList);
   }
 
+  @override
   Future<bool> clearCart() async {
-    try {
-      return await _prefs.remove(_cartKey);
-    } catch (e) {
-      debugPrint('Failed to clear cart: $e');
-      return false;
-    }
+    return await prefs.remove(_cartKey);
   }
 }
-
-final cartLocalDataSourceProvider = Provider<CartLocalDataSource>((ref) {
-  final prefs = ref.watch(sharedPreferencesProvider);
-  return CartLocalDataSource(prefs);
-});

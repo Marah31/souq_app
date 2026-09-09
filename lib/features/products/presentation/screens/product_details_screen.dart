@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:souq_app/core/localization/l10n_extension.dart';
+import 'package:souq_app/core/routing/app_router.dart';
 import 'package:souq_app/features/cart/presentation/providers/cart_provider.dart';
 import 'package:souq_app/features/products/domain/entity/product_entity.dart';
 import 'package:souq_app/features/products/presentation/providers/product_provider.dart';
@@ -262,69 +265,75 @@ class ProductDetailScreen extends ConsumerWidget {
                 height: 54,
                 color: Colors.transparent, 
                 child: FilledButton.icon(
-                  onPressed: () {
-                    final messenger = ScaffoldMessenger.of(context);
-                    final router = GoRouter.of(context);
-                    final theme = Theme.of(context);
+                onPressed: () {
+                  final router = GoRouter.of(context);
+                  final theme = Theme.of(context);
 
-                    ref.read(cartNotifierProvider.notifier).addToCart(product);
-                    
-                    messenger.clearSnackBars();
+                  ref.read(cartNotifierProvider.notifier).addToCart(product);
 
-                    messenger.showSnackBar(
-                      SnackBar(
-                        duration: const Duration(seconds: 3),
-                        behavior: SnackBarBehavior.floating,
-                        elevation: 4,
-                        backgroundColor: theme.colorScheme.primaryContainer,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16.0),
-                          side: BorderSide(
-                            color: theme.colorScheme.primary.withValues(
-                              alpha: 0.2,
-                            ),
-                            width: 1,
-                          ),
-                        ),
-                        margin: const EdgeInsets.symmetric(
-                          horizontal: 16.0,
-                          vertical: 12.0,
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16.0,
-                          vertical: 10.0,
-                        ),
-                        content: Row(
-                          children: [
-                            Icon(
-                              Icons.check_circle_rounded,
-                              color: theme.colorScheme.primary,
-                              size: 22,
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                context.l10n.addedToCart(product.title),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: theme.colorScheme.onPrimaryContainer,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        action: SnackBarAction(
-                          label: context.l10n.viewCart,
-                          textColor: theme.colorScheme.primary,
-                          onPressed: () {
-                            router.go('/cart');
-                          },
+                  final messenger = rootScaffoldMessengerKey.currentState;
+                  if (messenger == null) return;
+
+                  messenger.clearSnackBars();
+
+                  messenger.showSnackBar(
+                    SnackBar(
+                      duration: const Duration(seconds: 3),
+                      behavior: SnackBarBehavior.floating,
+                      elevation: 4,
+                      backgroundColor: theme.colorScheme.primaryContainer,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16.0),
+                        side: BorderSide(
+                          color: theme.colorScheme.primary.withValues(alpha: 0.2),
+                          width: 1,
                         ),
                       ),
-                    );
-                  },
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 16.0,
+                        vertical: 12.0,
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0,
+                        vertical: 10.0,
+                      ),
+                      content: Row(
+                        children: [
+                          Icon(
+                            Icons.check_circle_rounded,
+                            color: theme.colorScheme.primary,
+                            size: 22,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              context.l10n.addedToCart(product.title),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: theme.colorScheme.onPrimaryContainer,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      action: SnackBarAction(
+                        label: context.l10n.viewCart,
+                        textColor: theme.colorScheme.primary,
+                        onPressed: () {
+                          rootScaffoldMessengerKey.currentState?.clearSnackBars();
+                          router.go('/cart');
+                        },
+                      ),
+                    ),
+                  );
+
+                  Timer(const Duration(milliseconds: 2500), () {
+                    rootScaffoldMessengerKey.currentState?.clearSnackBars();
+                  });
+                },
+                                  
                   icon: const Icon(Icons.shopping_bag_outlined),
                   label: Text(
                     context.l10n.addToCart,

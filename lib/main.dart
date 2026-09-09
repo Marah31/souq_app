@@ -14,7 +14,6 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final prefs = await SharedPreferences.getInstance();
-
   runApp(
     ProviderScope(
       overrides: [
@@ -51,6 +50,7 @@ class MyApp extends ConsumerWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
+      scaffoldMessengerKey: rootScaffoldMessengerKey,      
       routerConfig: router,
     );
   }
