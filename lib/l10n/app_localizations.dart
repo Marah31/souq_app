@@ -346,6 +346,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Items'**
   String get items;
+
+  /// No description provided for @shippingProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'more to get FREE Shipping!'**
+  String get shippingProgress;
+
+  /// No description provided for @priceLowToHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'Price: Low to Hight'**
+  String get priceLowToHigh;
+
+  /// No description provided for @priceHighToLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Price: Hight to Low'**
+  String get priceHighToLow;
+
+  /// No description provided for @ratingHighToLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Highest Rating'**
+  String get ratingHighToLow;
+
+  /// No description provided for @sortProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort Products'**
+  String get sortProduct;
+
+  /// No description provided for @defaultSort.
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get defaultSort;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

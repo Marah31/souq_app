@@ -41,5 +41,11 @@
   "checkout": "شراء",
   "subtotal": "المبلغ الإجمالي",
   "add": "أضف",
-  "items": "منتج"
+  "items": "منتج",
+  "shippingProgress": "إضافي لتحصل على شحن مجاني!",
+  "priceLowToHigh": "السعر: منخفض إلى مرتفع",
+  "priceHighToLow": "السعر: مرتفع إلى منخفض",
+  "ratingHighToLow": "الأعلى تقييمًا",
+  "sortProduct": "ترتيب المنتجات",
+  "defaultSort": "تلقائي"
 }

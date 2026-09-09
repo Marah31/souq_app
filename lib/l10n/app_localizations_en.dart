@@ -135,4 +135,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get items => 'Items';
+
+  @override
+  String get shippingProgress => 'more to get FREE Shipping!';
+
+  @override
+  String get priceLowToHigh => 'Price: Low to Hight';
+
+  @override
+  String get priceHighToLow => 'Price: Hight to Low';
+
+  @override
+  String get ratingHighToLow => 'Highest Rating';
+
+  @override
+  String get sortProduct => 'Sort Products';
+
+  @override
+  String get defaultSort => 'Default';
 }

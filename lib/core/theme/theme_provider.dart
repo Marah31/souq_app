@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 const String _themeKey = 'user_theme_mode';
 
 class ThemeModeNotifier extends Notifier<ThemeMode> {
-  late SharedPreferences _prefs;
+  SharedPreferences? _prefs;
 
   @override
   ThemeMode build() {
@@ -15,11 +15,11 @@ class ThemeModeNotifier extends Notifier<ThemeMode> {
 
   Future<void> _initPrefs() async {
     _prefs = await SharedPreferences.getInstance();
-    final savedMode = _prefs.getString(_themeKey);
+    final savedMode = _prefs?.getString(_themeKey);
 
-    if (savedMode == 'light') {
+    if (savedMode == 'light' && state != ThemeMode.light) {
       state = ThemeMode.light;
-    } else if (savedMode == 'dark') {
+    } else if (savedMode == 'dark' && state != ThemeMode.dark) {
       state = ThemeMode.dark;
     }
   }
@@ -33,11 +33,11 @@ class ThemeModeNotifier extends Notifier<ThemeMode> {
 
     state = nextMode;
 
-    _prefs = await SharedPreferences.getInstance();
+    _prefs ??= await SharedPreferences.getInstance();
     if (nextMode == ThemeMode.system) {
-      await _prefs.remove(_themeKey);
+      await _prefs?.remove(_themeKey);
     } else {
-      await _prefs.setString(_themeKey, nextMode.name);
+      await _prefs?.setString(_themeKey, nextMode.name);
     }
   }
 }

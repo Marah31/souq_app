@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:souq_app/features/cart/data/datasource/cart_local_datasource.dart';
 import 'package:souq_app/features/cart/data/repositroy/cart_repository_impl.dart';
@@ -14,7 +15,7 @@ class CartNotifier extends Notifier<List<CartItemEntity>> {
     return _cartRepository.getSavedCart();
   }
 
-  void addToCart(ProductEntity product) {
+  Future<void> addToCart(ProductEntity product) async {
     final existingIndex = state.indexWhere((item) => item.product.id == product.id);
 
     if (existingIndex >= 0) {
@@ -28,17 +29,17 @@ class CartNotifier extends Notifier<List<CartItemEntity>> {
       state = [...state, CartItemEntity(product: product, quantity: 1)];
     }
 
-    _cartRepository.saveCart(state);
+    await _saveStateToDisk();
   }
 
-  void removeFromCart(int productId) {
+  Future<void> removeFromCart(int productId) async {
     state = state.where((item) => item.product.id != productId).toList();
-    _cartRepository.saveCart(state);
+    await _saveStateToDisk();
   }
 
-  void updateQuantity(int productId, int quantity) {
+  Future<void> updateQuantity(int productId, int quantity) async {
     if (quantity <= 0) {
-      removeFromCart(productId);
+      await removeFromCart(productId);
       return;
     }
 
@@ -49,14 +50,30 @@ class CartNotifier extends Notifier<List<CartItemEntity>> {
       return item;
     }).toList();
 
-    _cartRepository.saveCart(state);
+    await _saveStateToDisk();
   }
 
-  void clearCart() {
+  Future<void> clearCart() async {
     state = [];
-    _cartRepository.clearCart();
+    try {
+      await _cartRepository.clearCart();
+    } catch (e) {
+      debugPrint('Error clearing cart in repository: $e');
+    }
+  }
+
+  Future<void> _saveStateToDisk() async {
+    try {
+      final success = await _cartRepository.saveCart(state);
+      if (!success) {
+        debugPrint('Warning: Cart save returned false');
+      }
+    } catch (e) {
+      debugPrint('Error saving cart state to disk: $e');
+    }
   }
 }
+
 final cartNotifierProvider =
     NotifierProvider<CartNotifier, List<CartItemEntity>>(CartNotifier.new);
 

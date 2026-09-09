@@ -1,10 +1,8 @@
-enum ProductSortOption {
-  none,
-  priceLowToHigh,
-  priceHighToLow,
-  ratingHighToLow,
-}
-class ProductFilterState {
+import 'package:equatable/equatable.dart';
+
+enum ProductSortOption { none, priceLowToHigh, priceHighToLow, ratingHighToLow }
+
+class ProductFilterState extends Equatable {
   final String searchQuery;
   final String? selectedCategory;
   final ProductSortOption sortOption;
@@ -17,15 +15,16 @@ class ProductFilterState {
 
   ProductFilterState copyWith({
     String? searchQuery,
-    String? selectedCategory,
-    bool clearCategory = false,
+    String? Function()? selectedCategory, 
     ProductSortOption? sortOption,
   }) {
     return ProductFilterState(
       searchQuery: searchQuery ?? this.searchQuery,
-      selectedCategory: clearCategory ? null : (selectedCategory ?? this.selectedCategory),
+      selectedCategory: selectedCategory != null ? selectedCategory() : this.selectedCategory,
       sortOption: sortOption ?? this.sortOption,
     );
   }
-}
 
+  @override
+  List<Object?> get props => [searchQuery, selectedCategory, sortOption];
+}

@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 const String _localeKey = 'user_app_locale';
 
 class LocaleNotifier extends Notifier<Locale> {
-  late SharedPreferences _prefs;
+  SharedPreferences? _prefs;
 
   @override
   Locale build() {
@@ -15,9 +15,9 @@ class LocaleNotifier extends Notifier<Locale> {
 
   Future<void> _initPrefs() async {
     _prefs = await SharedPreferences.getInstance();
-    final savedLanguageCode = _prefs.getString(_localeKey);
+    final savedLanguageCode = _prefs?.getString(_localeKey);
 
-    if (savedLanguageCode != null) {
+    if (savedLanguageCode != null && state.languageCode != savedLanguageCode) {
       state = Locale(savedLanguageCode);
     }
   }
@@ -26,8 +26,8 @@ class LocaleNotifier extends Notifier<Locale> {
     if (state == newLocale) return;
     
     state = newLocale;
-    _prefs = await SharedPreferences.getInstance();
-    await _prefs.setString(_localeKey, newLocale.languageCode);
+    _prefs ??= await SharedPreferences.getInstance();
+    await _prefs?.setString(_localeKey, newLocale.languageCode);
   }
 
   Future<void> toggleLanguage() async {

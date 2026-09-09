@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 import '../../../../core/network/api_constants.dart';
 import '../../../../core/network/dio_client.dart';
 import '../models/product_dto.dart';
@@ -17,10 +19,22 @@ class ProductsRemoteDataSourceImpl implements ProductsRemoteDataSource {
   @override
   Future<List<ProductDto>> getProducts() async {
     final response = await _client.get(ApiConstants.products);
-    final data = response.data as List<dynamic>;
-    return data.map((json) => ProductDto.fromJson(json as Map<String, dynamic>)).toList();
-  }
+    
+    // debugPrint('HTTP Status Code: ${response.statusCode}');
+    // debugPrint('Raw Data Type: ${response.data.runtimeType}');
+    // debugPrint('Raw Data Content: ${response.data}');
 
+    if (response.data == null || response.data is! List) {
+      debugPrint('Warning: response.data was null or not a List');
+      return [];
+    }
+
+    final data = response.data as List<dynamic>;
+    return data
+        .whereType<Map<String, dynamic>>()
+        .map((json) => ProductDto.fromJson(json))
+        .toList();
+  }
   @override
   Future<ProductDto> getProductById(int id) async {
     final response = await _client.get(ApiConstants.productDetail(id));

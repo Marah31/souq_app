@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -8,13 +9,17 @@ import 'package:souq_app/features/products/presentation/providers/product_provid
 
 class ProductDetailScreen extends ConsumerWidget {
   final int productId;
+  final String? heroTag;
 
-  const ProductDetailScreen({super.key, required this.productId});
+  const ProductDetailScreen({super.key, required this.productId, this.heroTag});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final productsAsync = ref.watch(fetchProductsProvider);
     final theme = Theme.of(context);
+    final effectiveHeroTag = heroTag ?? 
+            (GoRouterState.of(context).extra as String?) ?? 
+            'product_image_$productId';
 
     return productsAsync.when(
       loading: () => Scaffold(
@@ -107,7 +112,6 @@ class ProductDetailScreen extends ConsumerWidget {
             ),
           );
         }
-
         return Scaffold(
           appBar: AppBar(
             title: Text(
@@ -131,9 +135,28 @@ class ProductDetailScreen extends ConsumerWidget {
                     ),
                     borderRadius: BorderRadius.circular(28.0),
                   ),
+                  
                   child: Hero(
-                    tag: 'product_image_${product.id}',
-                    child: Image.network(product.image, fit: BoxFit.contain),
+                    tag: effectiveHeroTag,
+                    child: CachedNetworkImage(
+                      imageUrl: product.image,
+                      fit: BoxFit.contain,
+                      placeholder: (context, url) => Center(
+                        child: SizedBox(
+                          width: 28,
+                          height: 28,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: theme.colorScheme.primary.withValues(alpha: 0.5),
+                          ),
+                        ),
+                      ),
+                      errorWidget: (context, url, error) => Icon(
+                        Icons.broken_image_rounded,
+                        size: 48,
+                        color: theme.colorScheme.error,
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -233,31 +256,24 @@ class ProductDetailScreen extends ConsumerWidget {
 
           bottomSheet: Container(
             padding: const EdgeInsets.all(16.0),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surface,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, -4),
-                ),
-              ],
-            ),
             child: SafeArea(
-              child: SizedBox(
+              child: Container(
                 width: double.infinity,
                 height: 54,
+                color: Colors.transparent, 
                 child: FilledButton.icon(
                   onPressed: () {
                     final messenger = ScaffoldMessenger.of(context);
                     final router = GoRouter.of(context);
                     final theme = Theme.of(context);
+
                     ref.read(cartNotifierProvider.notifier).addToCart(product);
+                    
                     messenger.clearSnackBars();
 
-                    final controller = messenger.showSnackBar(
+                    messenger.showSnackBar(
                       SnackBar(
-                        duration: const Duration(seconds: 2),
+                        duration: const Duration(seconds: 3),
                         behavior: SnackBarBehavior.floating,
                         elevation: 4,
                         backgroundColor: theme.colorScheme.primaryContainer,
@@ -303,15 +319,11 @@ class ProductDetailScreen extends ConsumerWidget {
                           label: context.l10n.viewCart,
                           textColor: theme.colorScheme.primary,
                           onPressed: () {
-                            messenger.hideCurrentSnackBar();
                             router.go('/cart');
                           },
                         ),
                       ),
                     );
-                    Future.delayed(const Duration(seconds: 2), () {
-                      controller.close();
-                    });
                   },
                   icon: const Icon(Icons.shopping_bag_outlined),
                   label: Text(
@@ -324,7 +336,7 @@ class ProductDetailScreen extends ConsumerWidget {
                 ),
               ),
             ),
-          ),
+                  ),
         );
       },
     );

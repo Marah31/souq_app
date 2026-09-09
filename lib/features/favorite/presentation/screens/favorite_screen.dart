@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:go_router/go_router.dart';
 import 'package:souq_app/core/localization/l10n_extension.dart';
 import 'package:souq_app/core/theme/app_theme.dart';
@@ -8,7 +7,8 @@ import 'package:souq_app/features/favorite/presentation/providers/favorite_provi
 import 'package:souq_app/features/products/presentation/screens/widget/product_card.dart';
 
 class FavoritesScreen extends ConsumerWidget {
-  const FavoritesScreen({super.key});
+  final String? heroTag;
+  const FavoritesScreen({super.key, this.heroTag});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -63,7 +63,11 @@ class FavoritesScreen extends ConsumerWidget {
               ? AppTheme.maxContentWidth
               : screenWidth;
 
-          final crossAxisCount = (contentWidth / 200).floor().clamp(2, 5);
+          final crossAxisCount = (contentWidth / 170.0).floor().clamp(1, 6);
+
+          final childAspectRatio = crossAxisCount <= 2
+              ? 0.62
+              : (crossAxisCount == 3 ? 0.68 : 0.74);
 
           if (favoriteProducts.isEmpty) {
             return Center(
@@ -73,7 +77,8 @@ class FavoritesScreen extends ConsumerWidget {
                   Container(
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                      color: theme.colorScheme.surfaceContainerHighest
+                          .withValues(alpha: 0.5),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
@@ -96,7 +101,9 @@ class FavoritesScreen extends ConsumerWidget {
                       context.l10n.favoriteEmptySubMessage,
                       textAlign: TextAlign.center,
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
+                        color: theme.textTheme.bodyMedium?.color?.withValues(
+                          alpha: 0.7,
+                        ),
                       ),
                     ),
                   ),
@@ -113,7 +120,9 @@ class FavoritesScreen extends ConsumerWidget {
 
           return Center(
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: AppTheme.maxContentWidth),
+              constraints: const BoxConstraints(
+                maxWidth: AppTheme.maxContentWidth,
+              ),
               child: CustomScrollView(
                 physics: const BouncingScrollPhysics(),
                 slivers: [
@@ -124,20 +133,31 @@ class FavoritesScreen extends ConsumerWidget {
                       top: 16.0,
                       bottom: 100.0,
                     ),
-                    sliver: SliverMasonryGrid.count(
-                      crossAxisCount: crossAxisCount,
-                      mainAxisSpacing: 24.0, 
-                      crossAxisSpacing: 20.0, 
-                      childCount: favoriteProducts.length,
-                      itemBuilder: (context, index) {
-                        final product = favoriteProducts[index];
-                        return ProductCard(
-                          product: product,
-                          onTap: () {
-                            context.push('/product/${product.id}');
-                          },
-                        );
-                      },
+                    sliver: SliverGrid(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: crossAxisCount,
+                        mainAxisSpacing: 20.0,
+                        crossAxisSpacing: 16.0,
+                        childAspectRatio: childAspectRatio,
+                      ),
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          final product = favoriteProducts[index];
+                          return ProductCard(
+                            key: ValueKey(product.id),
+                            product: product,
+                            onTap: () {
+                              final prefix = 'favorite';
+                              context.push(
+                                '/product/${product.id}?heroPrefix=$prefix',
+                              );
+                            },
+                          );
+                        },
+                        childCount: favoriteProducts.length,
+                        addAutomaticKeepAlives: false,
+                        addRepaintBoundaries: true,
+                      ),
                     ),
                   ),
                 ],

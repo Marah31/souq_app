@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:souq_app/features/favorite/presentation/providers/favorite_provider.dart';
@@ -6,113 +7,170 @@ import 'package:souq_app/features/products/domain/entity/product_entity.dart';
 class ProductCard extends ConsumerWidget {
   final ProductEntity product;
   final VoidCallback onTap;
+  final String? heroTag; 
 
   const ProductCard({
     super.key,
     required this.product,
     required this.onTap,
+    this.heroTag
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    
-    final isFavorite = ref
-        .watch(favoriteProductsProvider)
-        .any((p) => p.id == product.id);
 
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Stack(
-            children: [
-              AspectRatio(
-                aspectRatio: 1,
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20.0),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(20.0),
-                    child: Padding(
-                      padding: const EdgeInsets.all(14.0),
-                      child: Image.network(
-                        product.image,
+    final isFavorite = ref.watch(
+      favoriteProductsProvider.select((favs) => favs.any((p) => p.id == product.id)),
+    );
+    final effectiveHeroTag = heroTag ?? 'product_image_${product.id}';
+
+
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      elevation: 0,
+      color: theme.colorScheme.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16.0),
+      ),
+      child: InkWell(
+        onTap: onTap,
+
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+
+            Expanded(
+              flex: 5,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Container(
+                    color: theme.colorScheme.surfaceContainerHighest,
+                    padding: const EdgeInsets.all(8.0),
+                    child: Hero(
+                      tag: effectiveHeroTag,
+                      child: CachedNetworkImage(
+                        imageUrl: product.image,
                         fit: BoxFit.contain,
-                        errorBuilder: (_, __, ___) => Icon(
-                          Icons.broken_image_outlined,
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
+                        memCacheWidth: 250,
+                        memCacheHeight: 250,
+                        maxWidthDiskCache: 400,
+                        placeholder: (context, url) => const Center(
+                          child: SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
                         ),
-                        loadingBuilder: (context, child, progress) {
-                          if (progress == null) return child;
-                          return const Center(
-                            child: SizedBox(
-                              width: 24,
-                              height: 24,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            ),
-                          );
+                        errorWidget: (context, url, error) => Icon(
+                          Icons.broken_image_rounded,
+                          color: theme.colorScheme.error,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: 6.0,
+                    left: 6.0,
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: isFavorite
+                            ? Colors.transparent
+                            : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.8),
+                        shape: BoxShape.circle,
+                      ),
+                      child: IconButton(
+                        iconSize: 18,
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(
+                          minWidth: 32,
+                          minHeight: 32,
+                        ),
+                        icon: Icon(
+                          isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                          color: isFavorite ? Colors.red : theme.colorScheme.onSurfaceVariant,
+                        ),
+                        onPressed: () {
+                          ref.read(favoriteProductsProvider.notifier).toggleFavorite(product);
                         },
                       ),
                     ),
                   ),
-                ),
+                ],
               ),
-              PositionedDirectional(
-                top: 10,
-                end: 10,
-                child: Material(
-                  color: Colors.black26,
-                  shape: const CircleBorder(),
-                  child: InkWell(
-                    customBorder: const CircleBorder(),
-                    onTap: () {
-                      ref
-                          .read(favoriteProductsProvider.notifier)
-                          .toggleFavorite(product);
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Icon(
-                        isFavorite ? Icons.favorite : Icons.favorite_border,
-                        color: isFavorite ? Colors.redAccent : Colors.white,
-                        size: 18,
+            ),
+
+            Expanded(
+              flex: 4,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        product.title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
-                  ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              '\$${product.price.toStringAsFixed(2)}',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: theme.colorScheme.primary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ),
+                        if (product.rating.rate > 0) ...[
+                          const SizedBox(width: 4),
+                          Flexible(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.star_rounded,
+                                    size: 15,
+                                    color: Colors.amber,
+                                  ),
+                                  const SizedBox(width: 2),
+                                  Text(
+                                    product.rating.rate.toStringAsFixed(1),
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: 10),
-
-          Padding(
-            padding: const EdgeInsetsDirectional.only(start: 4.0, end: 4.0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Text(
-                    product.title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      height: 1.2,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  '\$${product.price.toInt()}',
-                  style: theme.textTheme.titleMedium,
-                ),
-              ],
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

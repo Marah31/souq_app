@@ -135,4 +135,22 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get items => 'منتج';
+
+  @override
+  String get shippingProgress => 'إضافي لتحصل على شحن مجاني!';
+
+  @override
+  String get priceLowToHigh => 'السعر: منخفض إلى مرتفع';
+
+  @override
+  String get priceHighToLow => 'السعر: مرتفع إلى منخفض';
+
+  @override
+  String get ratingHighToLow => 'الأعلى تقييمًا';
+
+  @override
+  String get sortProduct => 'ترتيب المنتجات';
+
+  @override
+  String get defaultSort => 'تلقائي';
 }

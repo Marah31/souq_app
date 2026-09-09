@@ -46,5 +46,11 @@
   "checkout": "Checkout",
   "subtotal": "Subtotal",
   "add": "Add",
-  "items": "Items"
+  "items": "Items",
+  "shippingProgress": "more to get FREE Shipping!",
+  "priceLowToHigh": "Price: Low to Hight",
+  "priceHighToLow": "Price: Hight to Low",
+  "ratingHighToLow": "Highest Rating",
+  "sortProduct": "Sort Products",
+  "defaultSort": "Default"
 }

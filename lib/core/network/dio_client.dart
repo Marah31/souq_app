@@ -1,8 +1,9 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:souq_app/core/error/exception.dart';
 import 'api_constants.dart';
 
-class DioClient {
+ class DioClient {
   final Dio _dio;
 
   DioClient({Dio? dio})
@@ -12,17 +13,19 @@ class DioClient {
                 baseUrl: ApiConstants.baseUrl,
                 connectTimeout: ApiConstants.connectTimeout,
                 receiveTimeout: ApiConstants.receiveTimeout,
-                headers: {'Content-Type': 'application/json'},
+                headers: const {'Content-Type': 'application/json'},
               ),
             ) {
-    _dio.interceptors.add(
-      LogInterceptor(
-        requestHeader: false,
-        responseHeader: false,
-        requestBody: true,
-        responseBody: true,
-      ),
-    );
+    if (kDebugMode) {
+      _dio.interceptors.add(
+        LogInterceptor(
+          requestHeader: false,
+          responseHeader: false,
+          requestBody: true,
+          responseBody: true,
+        ),
+      );
+    }
   }
 
   Dio get instance => _dio;
@@ -30,13 +33,21 @@ class DioClient {
   Future<Response<T>> get<T>(
     String path, {
     Map<String, dynamic>? queryParameters,
+    Options? options,
+    CancelToken? cancelToken,
   }) async {
     try {
-      return await _dio.get<T>(path, queryParameters: queryParameters);
+      return await _dio.get<T>(
+        path,
+        queryParameters: queryParameters,
+        options: options,
+        cancelToken: cancelToken,
+      );
     } on DioException catch (e) {
       throw _handleDioException(e);
-    } catch (e) {
-      throw ServerException(message: e.toString());
+    } catch (e, stackTrace) {
+      debugPrint('Unexpected error in GET request: $e\n$stackTrace');
+      throw ServerException(message: 'An unexpected error occurred: ${e.toString()}');
     }
   }
 
@@ -46,17 +57,23 @@ class DioClient {
       case DioExceptionType.sendTimeout:
       case DioExceptionType.receiveTimeout:
       case DioExceptionType.connectionError:
-        return const NetworkException();
+        return const NetworkException(message: 'Network connection timed out or failed.');
       case DioExceptionType.badResponse:
         final statusCode = e.response?.statusCode;
+        final statusMessage = e.response?.statusMessage;
         return ServerException(
-          message: e.response?.statusMessage ?? 'Server returned an error ($statusCode)',
+          message: statusMessage ?? 'Server returned an error ($statusCode)',
           statusCode: statusCode,
         );
       case DioExceptionType.cancel:
         return const ServerException(message: 'Request was cancelled.');
+      case DioExceptionType.badCertificate:
+        return const NetworkException(message: 'Invalid or untrusted security certificate.');
+      case DioExceptionType.unknown:
       default:
-        return const NetworkException(message: 'Network error occurred. Please try again.');
+        return NetworkException(
+          message: e.message ?? 'Network error occurred. Please try again.',
+        );
     }
   }
 }
