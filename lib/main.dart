@@ -20,7 +20,7 @@ Future<void> main() async {
       ],
     );
 
-  container.read(notificationInitializerProvider);
+  container.read(notificationInitializerProvider.future);
 
   runApp(
     UncontrolledProviderScope(
@@ -38,7 +38,6 @@ class MyApp extends ConsumerWidget {
     final themeMode = ref.watch(themeModeProvider);
     final locale = ref.watch(localeProvider);
     
-    // Clean Architecture: Triggers FCM initialization and logs token via Riverpod
     ref.watch(notificationInitializerProvider);
     
     final router = ref.watch(routerProvider);

@@ -6,12 +6,10 @@ import 'package:go_router/go_router.dart';
 import 'package:souq_app/core/routing/app_router.dart';
 
 final notificationInitializerProvider = FutureProvider<void>((ref) async {
-  // 1. Ensure Firebase Core is ready
   await Firebase.initializeApp();
 
   final messaging = FirebaseMessaging.instance;
 
-  // 2. Request Permissions (Android 13+ / iOS)
   final settings = await messaging.requestPermission(
     alert: true,
     badge: true,

@@ -1,11 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:souq_app/features/favorite/data/favorite_local_data_source.dart';
-import 'package:souq_app/features/products/data/models/product_dto.dart';
+import 'package:souq_app/features/favorite/data/repository/favorite_repository_impl.dart';
 import 'package:souq_app/features/products/domain/entity/product_entity.dart';
-
-final favoritesLocalDataSourceProvider = Provider<FavoritesLocalDataSource>((ref) {
-  return FavoritesLocalDataSourceImpl();
-});
 
 class FavoriteNotifier extends Notifier<List<ProductEntity>> {
   @override
@@ -15,34 +10,26 @@ class FavoriteNotifier extends Notifier<List<ProductEntity>> {
   }
 
   Future<void> _loadFavorites() async {
-    final dataSource = ref.read(favoritesLocalDataSourceProvider);
-    final dtos = await dataSource.getFavorites();
-    state = dtos.map((dto) => dto.toEntity()).toList();
+    final repository = ref.read(favoriteRepositoryProvider);
+    state = await repository.getFavorites();
   }
 
   Future<void> _saveFavorites(List<ProductEntity> updatedList) async {
-    final dataSource = ref.read(favoritesLocalDataSourceProvider);
-    final dtos = updatedList.map((e) => ProductDto.fromEntity(e)).toList();
-    await dataSource.saveFavorites(dtos);
+    final repository = ref.read(favoriteRepositoryProvider);
+    await repository.saveFavorites(updatedList);
   }
 
   void toggleFavorite(ProductEntity product) {
     final exists = state.any((p) => p.id == product.id);
-    List<ProductEntity> newState;
-
-    if (exists) {
-      newState = state.where((p) => p.id != product.id).toList();
-    } else {
-      newState = [...state, product];
-    }
+    final newState = exists
+        ? state.where((p) => p.id != product.id).toList()
+        : [...state, product];
 
     state = newState;
     _saveFavorites(newState);
   }
 
-  bool isFavorite(int productId) {
-    return state.any((p) => p.id == productId);
-  }
+  bool isFavorite(int productId) => state.any((p) => p.id == productId);
 
   void clearFavorites() {
     state = const [];

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:souq_app/features/products/data/models/product_dto.dart';
 
@@ -35,3 +36,7 @@ class FavoritesLocalDataSourceImpl implements FavoritesLocalDataSource {
     await prefs.setString(_favoritesKey, encoded);
   }
 }
+
+final favoritesLocalDataSourceProvider = Provider<FavoritesLocalDataSource>((ref) {
+  return FavoritesLocalDataSourceImpl();
+});

@@ -78,10 +78,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ? AppTheme.maxContentWidth
               : screenWidth;
 
-          // Explicit breakpoints instead of (width / targetWidth).floor():
-          // that formula rounded down to 1 column on real phone widths
-          // (e.g. 360dp content -> 360/220 = 1.6 -> floor = 1), which is
-          // why only a single card showed on mobile.
+          // Responsive grid layout based on screen width
           final int crossAxisCount;
           if (contentWidth < 600) {
             crossAxisCount = 2; // phones
@@ -104,9 +101,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 constraints: const BoxConstraints(
                   maxWidth: AppTheme.maxContentWidth,
                 ),
+                //customScrollView allowing mixing non-sliver widgets with sliver grids
                 child: CustomScrollView(
                   physics: const BouncingScrollPhysics(),
                   slivers: [
+                    // Search bar and category filter section
                     SliverToBoxAdapter(
                       child: Padding(
                         padding: EdgeInsets.symmetric(
@@ -162,6 +161,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   ),
                                 ),
                                 const SizedBox(width: 10),
+                                //sort options popup menu button
                                 Container(
                                   decoration: BoxDecoration(
                                     color:
@@ -217,6 +217,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               ],
                             ),
                             const SizedBox(height: 16),
+                            // Category filter chips
                             categoriesAsync.when(
                               data: (categories) => SingleChildScrollView(
                                 scrollDirection: Axis.horizontal,
@@ -276,6 +277,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         ),
                       ),
                     ),
+                    //product grid 
                     filteredProductsAsync.when(
                       loading: () => const SliverFillRemaining(
                         hasScrollBody: false,
@@ -382,6 +384,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               (context, index) {
                                 final product = products[index];
                                 final heroTag = 'hero_home_${product.id}_$index';
+                                // product cards
                                 return ProductCard(
                                   key: ValueKey(product.id),
                                   product: product,

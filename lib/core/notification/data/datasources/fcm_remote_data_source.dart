@@ -26,7 +26,7 @@ class FcmRemoteDataSourceImpl implements FcmRemoteDataSource {
     // Register top-level background handler
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
-    // Request permissions (Android 13+ requires explicit POST_NOTIFICATIONS)
+    // Request permissions 
     await _messaging.requestPermission(
       alert: true,
       badge: true,
